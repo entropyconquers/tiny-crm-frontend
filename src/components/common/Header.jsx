@@ -50,7 +50,7 @@ const Header = () => {
   // };
   const fetchUser = async () => {
   try {
-    const response = await fetch('https://tiny-crm-backend.onrender.com/api/user', {
+    const response = await fetch('/api/user', {
       method: 'GET',
       credentials: 'include', // Ensure cookies are sent with the request
       headers: {
