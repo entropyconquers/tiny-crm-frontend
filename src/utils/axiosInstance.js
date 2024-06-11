@@ -1,6 +1,5 @@
 // src/utils/axiosInstance.js
 import axios from 'axios';
-import { useCookies } from 'react-cookie';
 
 
 const axiosInstance = axios.create({

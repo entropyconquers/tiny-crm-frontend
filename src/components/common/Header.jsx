@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Box, Flex, Text, Avatar, Menu, MenuButton, MenuList, MenuItem, Button, Link, useColorModeValue, Heading, Divider } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../../utils/axiosInstance';
-import { useCookies } from 'react-cookie';
+
 
 const Header = () => {
   // Initialize errorCount from localStorage if available, otherwise start at 0
@@ -17,38 +17,70 @@ const Header = () => {
     fetchUser();
   }, []);
 
-  const fetchUser = async () => {
+  // const fetchUser = async () => {
 
-    try {
-      const response = await axiosInstance.get('/user');
-      if (response.data.user) {
-        setUser(response.data.user);
-      } else {
-        // Force refresh
-        window.location.reload();
-      }
-    } catch (error) {
-      console.error("Error fetching user", error);
-      // Check if the error has a response object
-      if (error.response) {
-        // You can handle HTTP-specific errors here
-        const { status } = error.response;
-        // Example: navigate based on status or show specific messages
-        // if (status === 401) {
-        //   window.location.href = '/';
-        // }
-      } else {
-        // The error is not from an HTTP response, handle accordingly
-        console.error("An error occurred that is not from an HTTP response", error);
-        // Implement a retry mechanism, or navigate, or show an error message
-        // Example: Retry after 1 second
-        setTimeout(() => {
-          window.location.reload();
-        }, 500);
-      }
+  //   try {
+  //     const response = await axiosInstance.get('/user');
+  //     if (response.data.user) {
+  //       setUser(response.data.user);
+  //     } else {
+  //       // Force refresh
+  //       window.location.reload();
+  //     }
+  //   } catch (error) {
+  //     console.error("Error fetching user", error);
+  //     // Check if the error has a response object
+  //     if (error.response) {
+  //       // You can handle HTTP-specific errors here
+  //       const { status } = error.response;
+  //       // Example: navigate based on status or show specific messages
+  //       // if (status === 401) {
+  //       //   window.location.href = '/';
+  //       // }
+  //     } else {
+  //       // The error is not from an HTTP response, handle accordingly
+  //       console.error("An error occurred that is not from an HTTP response", error);
+  //       // Implement a retry mechanism, or navigate, or show an error message
+  //       // Example: Retry after 1 second
+  //       setTimeout(() => {
+  //         window.location.reload();
+  //       }, 500);
+  //     }
+  //   }
+  // };
+  const fetchUser = async () => {
+  try {
+    const response = await fetch('/user', {
+      method: 'GET',
+      credentials: 'include', // Ensure cookies are sent with the request
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
-  };
-  const [cookies, setCookie, removeCookie] = useCookies();
+
+    const data = await response.json();
+
+    if (data.user) {
+      setUser(data.user);
+    } else {
+      // Force refresh
+      window.location.reload();
+    }
+  } catch (error) {
+    console.error("Error fetching user", error);
+    // Since fetch doesn't reject HTTP error statuses, check for response.ok
+    // No need to check for error.response like in Axios
+    // Implement a retry mechanism, or navigate, or show an error message
+    // Example: Retry after 0.5 seconds
+    setTimeout(() => {
+      window.location.reload();
+    }, 500);
+  }
+};
   function logoutUser() {
 
 
@@ -59,8 +91,6 @@ const Header = () => {
 
     axiosInstance.get('/logout').then((response) => {
       console.log(response);
-      removeCookie('token');
-      removeCookie('user');
       navigate('/');
     }).catch((error) => {
       console.error(error);
